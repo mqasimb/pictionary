@@ -8,6 +8,23 @@ app.use(express.static('public'));
 var server = http.Server(app);
 var io = socket_io(server);
 var connectedUsers = 0;
+var WORDS = [
+    "word", "letter", "number", "person", "pen", "class", "people",
+    "sound", "water", "side", "place", "man", "men", "woman", "women", "boy",
+    "girl", "year", "day", "week", "month", "name", "sentence", "line", "air",
+    "land", "home", "hand", "house", "picture", "animal", "mother", "father",
+    "brother", "sister", "world", "head", "page", "country", "question",
+    "answer", "school", "plant", "food", "sun", "state", "eye", "city", "tree",
+    "farm", "story", "sea", "night", "day", "life", "north", "south", "east",
+    "west", "child", "children", "example", "paper", "music", "river", "car",
+    "foot", "feet", "book", "science", "room", "friend", "idea", "fish",
+    "mountain", "horse", "watch", "color", "face", "wood", "list", "bird",
+    "body", "dog", "family", "song", "door", "product", "wind", "ship", "area",
+    "rock", "order", "fire", "problem", "piece", "top", "bottom", "king",
+    "space"
+];
+
+var randomWord = null;
 
 io.on('connection', function(socket) {
     console.log('Connection Started');
@@ -16,13 +33,13 @@ io.on('connection', function(socket) {
         socket.join('Drawer');
         socket.room = 'Drawer';
         connectedUsers++;
-        io.to('Drawer').emit('message', 'You are the drawer!');
+        io.to('Drawer').emit('message', 'Drawer');
     }
     else {
         socket.join('Guesser');
         socket.room = 'Guesser';
         connectedUsers++;
-        io.to('Guesser').emit('message', 'You are a Guesser');
+        io.to('Guesser').emit('message', 'Guesser');
     }
     
     socket.on('draw', function(position) {
@@ -33,6 +50,19 @@ io.on('connection', function(socket) {
     
     socket.on('guess', function(guess) {
        io.emit('guess', guess); 
+       if(guess.toLowerCase() === randomWord.toLowerCase()) {
+           socket.join('Drawer');
+           socket.room = 'Drawer';
+       }
+    });
+    
+    socket.on('removeDrawer', function() {
+        socket.to('Drawer').emit('removeDrawer');
+    });
+    
+    socket.on('random', function() {
+       randomWord = WORDS[Math.floor(Math.random()*WORDS.length)];
+       socket.emit('random', randomWord); 
     });
     
     socket.on('disconnect', function() {

@@ -3,6 +3,7 @@ var pictionary = function() {
     var socket = io();
     var drawing = false;
     var newGuess = $('#new-guess');
+    var randomButton = $('#randomButton');
 
     var draw = function(position) {
         context.beginPath();
@@ -12,12 +13,30 @@ var pictionary = function() {
     };
     
     var addMessage = function(notice) {
-      $('#notify').html(notice);  
+      $('#notify').html('You are a ' + notice);
+      if(notice === 'Drawer') {
+        $('#randomButton').css('visibility', 'visible');  
+      }
+      else {
+          $('#randomButton').css('visibility', 'hidden');
+      }
     };
     
     var addGuess = function(guess) {
         newGuess.text(guess);
     };
+    
+    var displayRandomWord = function(word) {
+        $('#randomWord').text('Draw a: '+word);
+    };
+    
+    randomButton.on('click', function(event) {
+       event.preventDefault();
+       socket.emit('random');
+       randomButton.attr('disabled', 'true');
+    });
+    
+    socket.on('random', displayRandomWord);
 
     canvas = $('canvas');
     context = canvas[0].getContext('2d');
@@ -53,7 +72,7 @@ var pictionary = function() {
     };
     
     socket.on('guess',addGuess);
-    socket.on('message', addMessage)
+    socket.on('message', addMessage);
     guessBox = $('#guess input');
     guessBox.on('keydown', onKeyDown);
 };
