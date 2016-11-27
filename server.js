@@ -44,8 +44,17 @@ io.on('connection', function(socket) {
     
     socket.on('draw', function(position) {
         if(socket.room === 'Drawer') {
+            // prevent access for others to draw
        socket.broadcast.to('Guesser').emit('draw', position); 
         }
+    });
+    
+    socket.on('checkDrawer', function() {
+       if(socket.room === 'Drawer') {
+           socket.emit('checkDrawer', true);
+       } else {
+           socket.emit('checkDrawer', false);
+       }
     });
     
     socket.on('guess', function(guess) {

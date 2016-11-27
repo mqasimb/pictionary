@@ -2,6 +2,7 @@ var pictionary = function() {
     var canvas, context;
     var socket = io();
     var drawing = false;
+    var isDrawer = false; 
     var newGuess = $('#new-guess');
     var randomButton = $('#randomButton');
 
@@ -47,9 +48,16 @@ var pictionary = function() {
     });
     canvas.on('mouseup', function(event) {
         drawing = false;
-    })
+    });
+    
+    socket.on('checkDrawer', drawCanvas);
+    function drawCanvas(canDraw){
+        // "true" or "false"
+        isDrawer = canDraw;
+    }
     canvas.on('mousemove', function(event) {
-        if(drawing) {
+        socket.emit('checkDrawer');
+        if(drawing && isDrawer) {
             var offset = canvas.offset();
             var position = {x: event.pageX - offset.left,
                             y: event.pageY - offset.top};
